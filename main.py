@@ -31,20 +31,14 @@ import pandas as pd
 df = pd.read_csv("kathbath/hindi/test/bucket.csv")
 data = []
 for index, row in df.iterrows():
-    print(index)
+    print(f"\n{index}")
     reference = row['transcript']
     result = pipeline(row['file_path'])
     res = evaluate(result["text"], reference)
     data.append({"file_path": row['file_path'], 'transcript': result['text'], "WER": res})
-    if index == 2:
-        break
-    print("\n")
 
-sumWER = 0
-dataLen = len(data)
-for i in range(dataLen):
-    sumWER += data[i]['WER']
-average = sumWER / (dataLen - 1)
+average = sum(float(record['WER']) for record in data) / len(data)
 data.append({'file_path': 'Total', 'WER': f"{average:.2f}"})
+
 df2 = pd.DataFrame(data)
-df2.to_csv("output-.csv", index=False)
+df2.to_csv("output.csv", index=False)

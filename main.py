@@ -26,13 +26,25 @@ def evaluate(hyp, ref):
     print(f"WER: {wer}")
     return wer
 
+
 import pandas as pd
 df = pd.read_csv("kathbath/hindi/test/bucket.csv")
-WERs = []
+data = []
 for index, row in df.iterrows():
     print(index)
     reference = row['transcript']
     result = pipeline(row['file_path'])
-    WERs.append(evaluate(result["text"], reference))
+    res = evaluate(result["text"], reference)
+    data.append({"file_path": row['file_path'], 'transcript': result['text'], "WER": res})
+    if index == 2:
+        break
     print("\n")
-print(f"WER on Kathbath Dataset: {(sum(WERs) / len(WERs))*100}")
+
+sumWER = 0
+dataLen = len(data)
+for i in range(dataLen):
+    sumWER += data[i]['WER']
+average = sumWER / (dataLen - 1)
+data.append({'file_path': 'Total', 'WER': f"{average:.2f}"})
+df2 = pd.DataFrame(data)
+df2.to_csv("output-.csv", index=False)
